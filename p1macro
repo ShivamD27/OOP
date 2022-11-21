@@ -86,3 +86,10 @@
 
 
 # print(MNT)
+#print MNT:---------------------------------------
+f2=open('MNT.txt',mode='a')
+f2.write("#name    pp    kp    mdtp    kpdtp")
+for i in range(0,len(MNT)):
+    f2.write(f"\n{MNT[i][0]}    {MNT[i][1]}     {MNT[i][2]}    {MNT[i][3]}    {MNT[i][4]}")
+f2.close()
+
