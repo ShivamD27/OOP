@@ -1,0 +1,83 @@
+symtab = []
+littab = []
+
+symtab.append(['A',100])
+symtab.append(['L1',103])
+symtab.append(['B',105])
+littab.append(['="5"',106])
+
+print(symtab)
+print(littab)
+
+
+def passtwoIs(lst):
+    f4 = open('Pass-2.txt',mode='a')
+    # f4.write(f"{lst[0]} + ")
+    temp = lst[1]
+    opcode = temp[4:6]     #opcode done
+
+    mem_operand2 = 0
+    # if(opcode == "09" or opcode == "10"):
+    #     reg_opcode = "0"
+    #     temp = lst[2]
+    #     temp2 = temp[3:]
+    #     mem_operand = temp2[0:len(temp2)-1]
+    #     index = int(mem_operand) - 1
+    #     mem_operand2 = symtab[index][1]    
+    if(opcode=='00'):
+        f4.write(f"00 00 000\n")
+        return
+    else: 
+        reg_opcode = lst[2][1]      #reg operand done
+        
+        temp = lst[3]
+        temp2 = temp[3:]
+        mem_operand = temp2[0:len(temp2)-1]        
+        index = int(mem_operand) - 1
+        checkLitOrSym = temp[1] 
+        if checkLitOrSym == 'S':
+            mem_operand2 = symtab[index][1]
+        else:
+            mem_operand2 = littab[index][1]      
+        
+    
+    f4.write(f"{lst[0]} + {opcode} {reg_opcode}  {mem_operand2}\n")
+
+def passtwoDL(lst):
+    f4 = open('Pass-2.txt',mode='a')
+    lc = lst[0]
+    temp = lst[1]
+    opcode = temp[4:6]
+    reg_opcode = "0"
+    temp = lst[2]
+    temp2 = temp[3:]
+    mem_operand = temp2[0:len(temp2)-1]
+    
+    if opcode == "01":
+        opcode="00"
+        mem_operand2 = ""
+        if len(mem_operand) == 1:
+            mem_operand2 = "00"+mem_operand
+        elif len(mem_operand) == 2:        
+            mem_operand2 = "0"+mem_operand
+        else:
+            mem_operand2 = mem_operand
+            
+        f4.write(f"{lst[0]} + {opcode} {reg_opcode}  {mem_operand2}\n")
+    
+    else:
+        LC = int(lc) 
+        for i in range(0,int(mem_operand)):
+            f4.write(f"{LC} + ----------\n")
+            LC += 1
+            
+f3 = open('Pass-1.txt',mode='r')
+for line in f3:
+    lst = line.split()
+    print(lst)
+    if len(lst) != 0:
+        if(lst[0] != '-x-'):
+            if 'IS' in lst[1]:
+                passtwoIs(lst)
+            else:
+                passtwoDL(lst)
