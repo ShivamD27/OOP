@@ -1,0 +1,454 @@
+// #include <bits/stdc++.h>
+// using namespace std;
+// #define ll long long
+
+// class op{
+//     public:
+
+//     int mutex, wrt, readcnt;
+
+//     op(){    //constructor
+//         mutex=1;
+//         readcnt=0;
+//         wrt=1;
+//     }
+
+//     void wait(int ins){
+//         ins=0;        
+//     }
+
+//     void signal(int ins){
+//         ins=1;
+//     }
+
+//     void write(){
+//         bool flag=false;
+//         int c;
+//         char ch;
+
+//         do{
+//             wait(wrt);
+//             cout<<"Writer process executing..."<<endl;
+//             do{
+//                 cout<<"----------------------"<<endl;
+//                 cout<<"1. write"<<endl;
+//                 cout<<"2. read"<<endl;
+//                 cout<<"3. none"<<endl;
+//                 cout<<"Enter choice: "<<endl;
+//                 cin>>c;
+//                 if(c==1){
+//                     cout<<"Another writer process cannot go."<<endl;
+//                     // break;
+//                 }
+//                 else if(c==2){
+//                     cout<<"Reader cannot go in when writer is in"<<endl;
+//                     // break;                    
+//                 }
+
+//             }while(c!=3);
+//             cout<<"Do you want to exit write process?(Y/N)"<<endl;
+//             cin>>ch;
+//             if(ch=='Y' || ch=='y'){                
+//                 signal(wrt);
+//                 flag=true;
+//             }
+//         }while(flag!=true);
+//     }
+
+
+//     void read(){
+//         bool flag=false;
+//         int c;
+//         do{
+//                 if(readcnt==0){
+//                     wait(wrt);
+//                     signal(mutex);  
+//                     readcnt++;                  
+//                     cout<<"Reading process executing"<<endl;
+//                 }
+//                 if(readcnt>=1){
+//                     wait(wrt);
+//                     signal(mutex);
+//                 }
+//                 cout<<"What process would you like to perform"<<endl;
+//                 cout<<"1.write"<<endl;
+//                 cout<<"2. read"<<endl;
+//                 cout<<"3. none"<<endl;
+//                 cout<<"enter choice"<<endl;
+//                 cin>>c;
+//                 if(c==1){
+//                     cout<<"Writer not allowed when reader in"<<endl;                                        
+//                 }
+//                 else if(c==2){
+//                     wait(wrt);
+//                     readcnt++;      //IMPORTANT>>>>>>>>>>>>>>
+//                     cout<<"Another reader inside"<<endl;
+//                 }                
+
+//                 readcnt--;
+//                 if(readcnt==0){
+//                     cout<<"the read process has ended"<<endl;
+//                     signal(wrt);
+//                     signal(mutex);
+//                     flag=true;
+//                 }
+            
+//         }while(flag!=true);
+//     }
+
+
+// };
+
+// int main(){
+//     op t;
+//     int choice;
+//     do{
+//         cout<<"-------------Menu-------------"<<endl;
+//         cout<<"1. write"<<endl;
+//         cout<<"2. read"<<endl;
+//         cout<<"3. exit"<<endl;
+//         cout<<"Enter choice: ";
+//         cin>>choice;
+//         switch(choice){
+//             case 1:
+//             t.write();
+//             break;
+            
+//             case 2:
+//             t.read();
+//             break;
+//         }
+
+//     }while(choice!=3);
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+
+struct block{
+    int blockSize,pSize;
+    string pname;
+    block* next;
+    bool isFree;
+
+    block(){
+        blockSize=0;
+        pSize=0;
+        block* next=NULL;
+        isFree=false;
+        pname="";
+    }
+};
+
+class memoryPlacement{
+    public:
+    // int n;
+    block* head=NULL;
+    block* curnode=NULL;
+
+
+    void createblock(){
+        int fb,mb,n;
+
+        cout<<"Enter number of blocks: ";
+        cin>>n;
+        for(int i=0;i<n;i++){
+            cout<<"is block "<<i+1<<" alive(1/0) ?: ";
+            cin>>fb;         
+            if(fb)   {
+                cout<<"Enter size of that block: ";
+                cin>>mb;
+
+                if(head==NULL){
+                    head =new block;
+                    head->blockSize=mb;
+                    head->isFree=true;
+                }
+                else{
+                    block* p=head;
+                    while(p->next!=NULL){
+                        p=p->next;                        
+                    }
+                    block* q=new block;
+                    p->next=q;
+                    q->isFree=true;
+                    q->blockSize=mb;                    
+                }
+            }
+            else{
+                cout<<"Enter size of that block: ";
+                cin>>mb;
+                string ps;
+                cout<<"Enter name of the process: ";
+                cin>>ps;
+                int psize;
+                cout<<"Enter size of the procss: ";
+                cin>>psize;
+
+                if(head==NULL){
+                    head=new block;
+                    head->isFree=false;
+                    head->blockSize=mb;
+                    head->pSize=psize;
+                    head->pname=ps;
+                    cout<<"head: "<<head<<endl;
+                }
+                else{
+                    block* p=head;
+                    while(p->next!=NULL){
+                        p=p->next;
+                    }
+                    block* q=new block;
+                    p->next=q;
+                    q->isFree=false;
+                    q->blockSize=mb;
+                    q->pSize=psize;
+                    q->pname=ps;
+                    
+                }
+            }
+        }
+
+    }
+
+    void displayblocks(){
+        int i=0;
+        block* p=head;
+        while(p!=NULL){
+            if(p->isFree){
+                cout<<"block no. "<<i+1<<endl;
+                cout<<"block size: "<<p->blockSize<<endl;
+                cout<<"isfree status: "<<p->isFree<<endl;
+                cout<<endl;
+            }
+            else{
+                cout<<"block no. "<<i+1<<endl;
+                cout<<"block size: "<<p->blockSize<<endl;
+                cout<<"isfree status: "<<p->isFree<<endl;
+                cout<<"process name: "<<p->pname<<endl;
+                cout<<"process size: "<<p->pSize<<endl;
+                cout<<"Available size: "<<(p->blockSize - p->pSize)<<endl;
+                cout<<endl;
+            }
+
+            p=p->next;
+            i++;
+        }
+
+    }
+
+    void firstfit(){
+        string ps;
+        cout<<"Enter process name: ";
+        cin>>ps;
+        int psize;
+        cout<<"enter process size: ";
+        cin>>psize;
+        int flag=0;
+        block* p=head;
+        while(p!=NULL){
+            if(p->isFree && p->blockSize >= psize){
+                flag=1;
+                p->pSize=psize;
+                p->pname=ps;
+                p->isFree=false;
+                break;
+            }
+            p=p->next;
+        }
+        if(flag=1){
+            cout<<"successfull "<<endl;            
+        }
+        else{
+            cout<<"Cannot assign memory"<<endl;
+        }
+    }
+
+
+    void bestfit(){
+        string ps;
+        cout<<"Enter process name: ";
+        cin>>ps;
+        int psize;
+        cout<<"enter process size: ";
+        cin>>psize;
+        int flag=0;
+        block* p=head;
+        block* x=NULL;
+        int maxx=INT_MAX;
+        while(p!=NULL){
+            if(p->isFree && p->blockSize >= psize){
+                flag=1;
+                if((p->blockSize-psize) < maxx){
+                    maxx=(p->blockSize - psize);
+                    x=p;
+                }
+            }
+            p=p->next;
+        }
+        if(flag){
+            x->isFree=false;
+            x->pname=ps;
+            x->pSize=psize;
+            cout<<"succccessfull "<<endl;
+        }
+        else{
+            cout<<"not assigned"<<endl;
+        }
+    }
+
+    void worstfit(){
+        string ps;
+        cout<<"Enter process name: ";
+        cin>>ps;
+        int psize;
+        cout<<"enter process size: ";
+        cin>>psize;
+        int flag=0;
+        block* p=head;
+        block* x=NULL;
+        int minn=0;
+        while(p!=NULL){
+            if(p->isFree && p->blockSize >= psize){
+                flag=1;
+                if(minn < p->blockSize - psize){
+                    x=p;
+                    minn=p->blockSize - psize;
+                }
+            }
+            p=p->next;
+        }    
+        if(flag){
+            x->isFree=false;
+            x->pSize=psize;
+            x->pname=ps;
+            cout<<"Succesfull"<<endl;
+        }
+        else{
+            cout<<"not assignmed"<<endl;
+        }
+
+    }
+
+    void nextfit(){
+        string ps;
+        cout<<"Enter process name: ";
+        cin>>ps;
+        int psize;
+        cout<<"enter process size: ";
+        cin>>psize;
+        int flag=0;
+        block* p=head;
+
+        if(curnode!=NULL){
+            p=curnode;
+        }
+
+        while(p!=NULL){
+            if(p->isFree && p->blockSize >= psize){
+                curnode=p;
+                flag=1;
+                p->pSize=psize;
+                p->pname=ps;
+                p->isFree=false;
+                break;
+            }
+            p=p->next;
+        }
+        if(flag=1){
+            cout<<"successfull "<<endl;            
+        }
+        else{
+            cout<<"Cannot assign memory"<<endl;
+        }
+
+
+    }
+
+
+};
+int main(){
+    memoryPlacement mp;
+    int choice;
+
+    do{
+        cout<<"----------------------"<<endl;
+        cout<<"1. create mem block"<<endl;
+        cout<<"2. First fir"<<endl;
+        cout<<"3. Best fir"<<endl;
+        cout<<"4. worst ffit"<<endl;
+        cout<<"5. next fit"<<endl;
+        cout<<"6. display"<<endl;
+        cout<<"7. exit"<<endl;
+        cout<<"Enter choice"<<endl;
+        cin>>choice;
+        switch(choice){
+            case 1:
+                mp.createblock();
+                break;
+
+            case 2:
+                mp.firstfit();
+                break;
+
+            case 3:
+                mp.bestfit();
+                break;
+
+            case 4:
+                mp.worstfit();
+                break;
+
+            case 5:
+                mp.nextfit();
+                break;
+
+            case 6:
+                mp.displayblocks();
+                break;
+
+            case 7:
+                cout<<"thank you!"<<endl;
+                break;
+        }
+
+    }while(choice!=7);
+
+
+    return 0;
+}
