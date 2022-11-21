@@ -1,0 +1,25 @@
+import java.util.*;
+import java.io.*;
+import java.net.*;
+
+public class client{
+    public static void main(String args[]){
+        try{
+            Socket csoc = new Socket("localhost",12345);
+            PrintWriter out=new PrintWriter(csoc.getOutputStream(),true);
+            BufferedReader in=new BufferedReader(new InputStreamReader(csoc.getInputStream()));
+            Scanner sc=new Scanner(System.in);
+            String line=null;
+            while(!"exit".equalsIgnoreCase(line)){
+                System.out.println("Write Something: ");
+                line=sc.nextLine();
+                out.println(line);
+                System.out.println("Server replied: "+in.readLine());
+            }
+            csoc.close();
+        }
+        catch(Exception e){
+            System.out.println(e);
+        }
+    }
+}
