@@ -1,0 +1,257 @@
+Amneomoic_table = {'START':('01','AD'), 'END':('02','AD'), 'ORIGIN':('03','AD'),'EQU':('04','AD'),'LTORG':('05','AD')}
+Imneomoic_table = {'STOP':('00','IS'), 'ADD':('01','IS'), 'SUB':('02','IS'), 'MUL':('03','IS'), 'MOVER':('04','IS'), 'MOVEM':('05','IS'), 'COMP':('06','IS'), 'BC':('07','IS'), 'DIV':('08','IS'), 'READ':('09','IS'), 'PRINT':('10','IS')}
+Register_table = {'AREG':('1'),'BREG':('2'),'CREG':('3'),'DREG':('4')}
+symtab=[]
+littab = []
+lc=0
+cntlit = 0
+indexofpooltab = 0
+pooltab = []
+litind = 1
+pooltab.append(0)
+checkindexforduplicate = 0
+
+def symtabinsert(string): #for inserting the symbol if it is not present
+    flag=False
+    for i in range(0,len(symtab)):
+        if string == symtab[i][0]:
+            return #change
+    symtab.append([string,0])
+       
+def symtabindexret(string): #returns the index value for the symbol
+    for i in range(0,len(symtab)):
+        if string == symtab[i][0]:
+            f1=open('Pass-1.txt',mode='a')
+            i+=1
+            a="(S,"+str(i)+")"
+            f1.write(a)
+            f1.close()
+            
+def litinsert(opcode):
+    f1=open('Pass-1.txt',mode='a')
+    global cntlit
+    global litind
+    index = pooltab[checkindexforduplicate]
+    for i in range(index,len(littab)):
+        if opcode == littab[i][0]:
+            f1.write(f"(l,{str(i+1)})")
+            return
+    littab.append([opcode,0])
+    cntlit += 1
+    f1.write(f"(l,{str(litind)})")
+    litind += 1
+    # print("littttttt ",littab) 
+    
+
+def operation(opcode):
+    global lc
+    if opcode in Amneomoic_table.keys():
+        f1=open('Pass-1.txt',mode='a')
+        state1 = Amneomoic_table[opcode][1]
+        state2 = Amneomoic_table[opcode][0]
+        if opcode == 'END':
+            ltorgop()
+        print("hey literal ",littab)    
+        f1.write(f"-x- ({state1},{state2}) ")
+        f1.close()
+    elif (opcode in Register_table):
+        f1=open('Pass-1.txt',mode='a')
+        f1.write(f" ({Register_table[opcode]}) ")
+        f1.close()
+       
+    elif opcode in Imneomoic_table.keys():
+        f1=open('Pass-1.txt',mode='a')
+        state1 = Imneomoic_table[opcode][1]
+        state2 = Imneomoic_table[opcode][0]
+        f1.write(f"{lc} ({state1},{state2})")
+        f1.close()
+        lc += 1
+       
+    else:
+        # if ':' in opcode: #change
+        #     labelsymb(opcode)
+        if '=' in opcode:   
+            litinsert(opcode)
+        else:
+            symtabinsert(opcode)
+            symtabindexret(opcode)
+
+def DLoperation(opcode,int_operand):
+    global lc
+    if opcode=='DS':
+        i=int(int_operand)
+        f1=open('Pass-1.txt',mode='a')
+        f1.write(f"{lc} (DL,02) (C,{int_operand})")
+        f1.close()
+        lc+=i
+       
+    elif opcode=='DC':
+        f1=open('Pass-1.txt',mode='a')
+        f1.write(f"{lc} (DL,01) (C,{int_operand})")
+        f1.close()
+        lc+=1
+
+def equoperation(leftop,rightop):
+    righvaladdress = 0
+    const = 0
+    plusflag = True
+    if '+' in rightop:
+        lst = rightop.split('+')
+        print(lst)
+        for i in range(len(symtab)):
+            if lst[0] == symtab[i][0]:
+                righvaladdress = symtab[i][1]
+                break
+        const = int(lst[1])
+    elif '-' in rightop:
+        plusflag = False
+        lst = rightop.split('-')
+        for i in range(len(symtab)):
+            if lst[0] == symtab[i][0]:
+                righvaladdress = symtab[i][1]
+                break
+        const = int(lst[1])
+
+    else:
+        for i in range(len(symtab)):
+            if rightop == symtab[i][0]:
+                righvaladdress = symtab[i][1]
+
+    if plusflag:
+        righvaladdress = righvaladdress + const
+    else:
+        righvaladdress = righvaladdress - const
+
+    for i in range(len(symtab)):
+        if leftop == symtab[i][0]:
+            symtab[i][1] = righvaladdress
+            return
+
+    symtab.append([leftop,righvaladdress])
+    
+    
+def ltorgop():
+    global lc
+    global indexofpooltab
+    global checkindexforduplicate
+    pooltab.append(cntlit)
+    # print("this is ",indexofpooltab," :: ",cntlit)
+    for i in range(indexofpooltab,cntlit):
+        littab[i][1] = lc
+        lc += 1
+    indexofpooltab = cntlit
+    checkindexforduplicate += 1
+    print("this is ",littab)  
+
+def origin_fun(exp):
+    global lc
+    righvaladdress = 0
+    const = 0
+    plusflag = True
+    indexforwrite = 0
+    f1=open('Pass-1.txt',mode='a')
+    if '+' in exp:
+        lst = exp.split('+')
+        print(lst)
+        for i in range(len(symtab)):
+            if lst[0] == symtab[i][0]:
+                righvaladdress = symtab[i][1]
+                indexforwrite = i+1
+                break
+        const = int(lst[1])
+        f1.write(f" (S,{indexforwrite})+{str(const)} ")
+    elif '-' in exp:
+        plusflag = False
+        lst = exp.split('-')
+        for i in range(len(symtab)):
+            if lst[0] == symtab[i][0]:
+                righvaladdress = symtab[i][1]
+                indexforwrite = i+1
+                break
+        const = int(lst[1])
+        f1.write(f" (S,{indexforwrite})-{str(const)} ")
+    else:
+        for i in range(len(symtab)):
+            if exp == symtab[i][0]:
+                indexforwrite = i+1
+                righvaladdress = symtab[i][1]
+        f1.write(f" (S,{indexforwrite})")                
+    
+    if plusflag:
+        righvaladdress = righvaladdress + const
+    else:
+        righvaladdress = righvaladdress - const
+
+    lc = righvaladdress
+    print("after update ",lc)
+
+def giveaddress(label):
+    for i in range(len(symtab)):
+        if symtab[i][0] == label:
+            symtab[i][1] = lc          # == instead =
+            return
+    symtab.append([label,lc])   
+
+def labelCall(lst):
+    for i in range(0,len(lst)):          #lst instead of symtab
+        if 'DS' in lst or 'DC' in lst:
+            print("YEs ",lst)
+            giveaddress(lst[0])
+            DLoperation(lst[1],lst[2])       #lst[1,2]
+            return
+        else:
+            if i == 0 and (lst[i] not in Amneomoic_table.keys() and lst[i] not in Imneomoic_table.keys()):
+                giveaddress(lst[0])
+            else:
+                operation(lst[i])
+
+f=open('text.txt',mode='r')
+
+for data in f:
+    lst=data.split()
+    if 'START' in lst:
+        operation(lst[0])
+        if len(lst) == 2:
+            lc = int(lst[1])
+            f1=open('Pass-1.txt',mode='a')
+            f1.write(f"(C,{int(lst[1])})")
+            f1.close()
+    elif 'EQU' in lst:
+        operation(lst[1])
+        equoperation(lst[0],lst[2])     #jhhejkasdf
+    elif 'ORIGIN' in lst:
+        operation(lst[0])
+        origin_fun(lst[1])
+    elif 'LTROG' in lst:
+        f1=open('Pass-1.txt',mode='a')
+        f1.write(f"-x- (AD,05) ")
+        f1.close()
+        ltorgop()
+    else:
+        labelCall(lst)     #djdnjndjcdsmvkd
+
+    f1=open('Pass-1.txt',mode='a')
+    f1.write("\n")
+    f1.close()
+
+f.close()
+
+#printing symbol table:
+f2=open('SymbolTab.txt',mode='a')
+f2.write("index        symbol       address")
+for i in range(0,len(symtab)):
+    string = str(i)+"        "+symtab[i][0]+"        "+str(symtab[i][1])            #str() is imp for last lode
+    f2.write("\n"+string)
+f2.close()
+print(symtab)
+
+#printing literal table:
+flit=open('LiteralTab.txt',mode='a')
+flit.write("index        literal       address")
+for i in range(0,len(littab)):
+    string = str(i)+"        "+littab[i][0]+"        "+str(littab[i][1])
+    flit.write("\n"+string)
+flit.close()
+print(littab)
+
+f3 = open('Pass-1.txt',mode='a')
